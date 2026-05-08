@@ -7,51 +7,40 @@
   <style>
     :root { --bg: #f8f9fa; --accent: #e83e8c; --text: #333; --card: #fff; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .container { background: var(--card); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 480px; width: 100%; text-align: center; }
-    h2 { margin-bottom: 1.5rem; color: var(--accent); font-size: 1.4rem; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .container { background: var(--card); padding: 1.8rem 1.2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 480px; width: 100%; text-align: center; }
+    h2 { margin-bottom: 1.2rem; color: var(--accent); font-size: 1.35rem; }
     
-    /* Контейнер для кода - всегда в ряд, с прокруткой если нужно */
-    .code-wrapper { overflow-x: auto; padding: 4px 2px; margin-bottom: 16px; scrollbar-width: none; }
-    .code-wrapper::-webkit-scrollbar { display: none; }
-    
-    .code-inputs { display: flex; gap: 6px; justify-content: center; flex-wrap: nowrap; }
-    .code-inputs input { 
-      width: 48px; 
-      height: 56px; 
-      font-size: 24px; 
-      text-align: center; 
-      border: 2px solid #ddd; 
-      border-radius: 10px; 
-      outline: none; 
-      transition: all 0.2s; 
-      background: #fff; 
-      flex-shrink: 0; /* Не сжиматься */
+    .code-inputs { display: flex; gap: 6px; justify-content: center; margin-bottom: 16px; }
+    .code-inputs input {
+      width: 38px; height: 46px; font-size: 22px; text-align: center;
+      border: 2px solid #ddd; border-radius: 8px; outline: none;
+      transition: all 0.2s; background: #fff; flex-shrink: 0;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     }
     .code-inputs input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232, 62, 140, 0.15); }
     .code-inputs input.filled { border-color: #aaa; background: #f1f3f4; }
     
-    /* Адаптив для очень узких экранов */
-    @media (max-width: 360px) {
-      .code-inputs input { width: 42px; height: 52px; font-size: 22px; }
-      .container { padding: 1.5rem; }
-      h2 { font-size: 1.3rem; margin-bottom: 1.2rem; }
-    }
-    
-    button { padding: 12px 24px; font-size: 16px; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: transform 0.1s, opacity 0.2s; }
+    button { padding: 12px 28px; font-size: 16px; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: transform 0.1s, opacity 0.2s; touch-action: manipulation; }
     button:hover { opacity: 0.9; }
-    button:active { transform: scale(0.98); }
+    button:active { transform: scale(0.97); }
     
     #result { margin-top: 1.5rem; display: none; }
     #result img { max-width: 100%; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
-    .error { color: #d93025; margin-top: 12px; display: none; font-size: 14px; min-height: 20px; }
-    .hint { margin-top: 1rem; font-size: 13px; color: #666; }
+    .error { color: #d93025; margin-top: 10px; display: none; font-size: 14px; min-height: 20px; }
+    .hint { margin-top: 1rem; font-size: 13px; color: #666; line-height: 1.4; }
     
-    /* Скрытые элементы после успеха */
-    .input-section.hidden, .error.hidden { display: none; }
+    .input-section.hidden { display: none; }
     
     .back-link { display: inline-block; margin-top: 1.5rem; color: #555; text-decoration: none; font-size: 14px; }
     .back-link:hover { text-decoration: underline; }
+
+    /* Для очень узких экранов (старые Android, iPhone SE 1st gen) */
+    @media (max-width: 340px) {
+      .container { padding: 1.4rem 0.8rem; }
+      .code-inputs input { width: 34px; height: 42px; font-size: 20px; }
+      h2 { font-size: 1.25rem; }
+    }
   </style>
 </head>
 <body>
@@ -59,16 +48,13 @@
     <h2 id="pageHeader">🔐 Введи код доступа</h2>
     
     <div class="input-section" id="inputSection">
-      <!-- Обёртка с горизонтальным скроллом для мобильных -->
-      <div class="code-wrapper">
-        <div class="code-inputs">
-          <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="0" autocomplete="one-time-code">
-          <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="1" autocomplete="one-time-code">
-          <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="2" autocomplete="one-time-code">
-          <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="3" autocomplete="one-time-code">
-          <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="4" autocomplete="one-time-code">
-          <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="5" autocomplete="one-time-code">
-        </div>
+      <div class="code-inputs">
+        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="0" autocomplete="one-time-code">
+        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="1" autocomplete="one-time-code">
+        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="2" autocomplete="one-time-code">
+        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="3" autocomplete="one-time-code">
+        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="4" autocomplete="one-time-code">
+        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="digit" data-index="5" autocomplete="one-time-code">
       </div>
       <button onclick="checkCode()">Открыть</button>
       <p class="error" id="errorMsg"></p>
@@ -80,7 +66,6 @@
       <p class="hint" style="margin-top: 12px;">Ты нашла то, что искала ❤️</p>
     </div>
     
-    <!-- Ссылка назад: закомментирована -->
     <!-- <a href="index.html" class="back-link">← Вернуться к началу квеста</a> -->
   </div>
 
@@ -99,17 +84,13 @@
       input.addEventListener('input', (e) => {
         const val = e.target.value.replace(/\D/g, '');
         e.target.value = val;
-        if (val && index < digits.length - 1) {
-          digits[index + 1].focus();
-        }
+        if (val && index < digits.length - 1) digits[index + 1].focus();
         e.target.classList.toggle('filled', !!val);
         resetError();
       });
       
       input.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && !e.target.value && index > 0) {
-          digits[index - 1].focus();
-        }
+        if (e.key === 'Backspace' && !e.target.value && index > 0) digits[index - 1].focus();
         if (e.key === 'ArrowLeft' && index > 0) digits[index - 1].focus();
         if (e.key === 'ArrowRight' && index < digits.length - 1) digits[index + 1].focus();
       });
@@ -149,17 +130,16 @@
       } else {
         errorMsg.textContent = 'Неверный код. Попробуй ещё раз 💔';
         errorMsg.style.display = 'block';
+        
+        // Вибрация при ошибке (работает на Android и iOS Safari)
+        if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+        
         digits.forEach(inp => { inp.value = ''; inp.classList.remove('filled'); });
         digits[0].focus();
       }
     }
     
-    window.addEventListener('load', () => {
-      digits[0].focus();
-      // Прокрутка обёртки в начало при загрузке (на всякий случай)
-      const wrapper = document.querySelector('.code-wrapper');
-      if (wrapper) wrapper.scrollLeft = 0;
-    });
+    window.addEventListener('load', () => digits[0].focus());
   </script>
 </body>
 </html>
