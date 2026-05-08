@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Квест для любимой</title>
+  <style>
+    :root { --bg: #f8f9fa; --accent: #e83e8c; --text: #333; --card: #fff; --rules-bg: #fdf2f7; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .container { background: var(--card); padding: 2rem 1.5rem; border-radius: 16px; box-shadow: 0 6px 24px rgba(0,0,0,0.08); max-width: 520px; width: 100%; text-align: center; opacity: 0; transform: translateY(10px); transition: all 0.6s ease-out; }
+    .container.visible { opacity: 1; transform: translateY(0); }
+    
+    h1 { font-size: 1.8rem; margin-bottom: 0.8rem; color: var(--accent); line-height: 1.3; }
+    h3 { font-size: 1.2rem; margin: 1.2rem 0 0.6rem; color: var(--text); }
+    p { line-height: 1.6; margin-bottom: 1rem; font-size: 1rem; color: #444; }
+    
+    .rules-box { background: var(--rules-bg); padding: 1.2rem; border-radius: 10px; margin: 1.5rem 0; text-align: left; }
+    .rules-box ul { padding-left: 1.2rem; margin: 0; }
+    .rules-box li { margin-bottom: 0.5rem; line-height: 1.5; }
+    
+    .task-box { margin: 1.5rem 0; }
+    .spoiler-btn { padding: 10px 20px; font-size: 15px; background: #fff; color: var(--accent); border: 2px solid var(--accent); border-radius: 8px; cursor: pointer; transition: all 0.2s; margin-top: 0.5rem; }
+    .spoiler-btn:hover { background: var(--accent); color: #fff; }
+    .spoiler-content { display: none; margin-top: 1rem; animation: fadeIn 0.4s ease-out; }
+    .spoiler-content img { max-width: 100%; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    
+    .start-btn { display: inline-block; margin-top: 1.5rem; padding: 14px 32px; font-size: 17px; background: var(--accent); color: #fff; border: none; border-radius: 10px; text-decoration: none; cursor: pointer; transition: transform 0.1s, opacity 0.2s; box-shadow: 0 4px 12px rgba(232, 62, 140, 0.3); }
+    .start-btn:hover { opacity: 0.95; }
+    .start-btn:active { transform: scale(0.97); }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    
+    @media (max-width: 360px) {
+      .container { padding: 1.5rem 1rem; }
+      h1 { font-size: 1.6rem; }
+      .start-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="mainContainer">
+    <h1>🎉 С Днём Рождения, любимая! 🎂</h1>
+    <p>Сегодня тебе 30 — это особенный юбилей, когда хочется остановить время и сказать спасибо за каждый миг рядом с тобой. Но этот день только начинается... ✨</p>
+    <p>Впереди тебя ждёт небольшой квест. Каждый шаг — маленькая загадка, а в конце тебя ждёт подарок. Я уверен, он тебе очень понравится ❤️</p>
+    
+    <div class="rules-box">
+      <h3>📜 Правила квеста:</h3>
+      <ul>
+        <li>Каждая подсказка ведёт к следующему шагу</li>
+        <li>Каждый предмет в задании используется только один раз</li>
+        <li>Если застряла — открывай спойлеры с подсказками</li>
+        <li>Не торопись. Главное — удовольствие от игры!</li>
+      </ul>
+    </div>
+
+    <div class="task-box">
+      <h3>🔍 Задание #1: Найди ручку</h3>
+      <p>Твоё первое задание совсем простое. Найди ручку, которой ты будешь записывать ответы. Она где-то рядом... присмотрись 👀</p>
+      <button class="spoiler-btn" type="button" onclick="toggleSpoiler()">📍 Показать, где искать</button>
+      <div class="spoiler-content" id="spoiler">
+        <img src="pen.jpg" alt="Подсказка: место, где лежит ручка">
+        <p style="margin-top: 8px; font-size: 13px; color: #666;">Подсказка: она ждёт тебя именно здесь 😉</p>
+      </div>
+    </div>
+
+    <a href="step1.html" class="start-btn">Начать квест →</a>
+  </div>
+
+  <script>
+    // Плавное появление при загрузке
+    window.addEventListener('load', () => {
+      document.getElementById('mainContainer').classList.add('visible');
+    });
+
+    // Управление спойлером
+    function toggleSpoiler() {
+      const spoiler = document.getElementById('spoiler');
+      const btn = document.querySelector('.spoiler-btn');
+      if (spoiler.style.display === 'block') {
+        spoiler.style.display = 'none';
+        btn.textContent = '📍 Показать, где искать';
+      } else {
+        spoiler.style.display = 'block';
+        btn.textContent = '🔽 Скрыть подсказку';
+      }
+    }
+  </script>
+</body>
+</html>
