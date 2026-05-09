@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<title>Последний шифр</title>
+
+<style>
+
+:root{
+  --accent:#e83e8c;
+  --text:#333;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:system-ui,-apple-system,sans-serif;
+
+  color:var(--text);
+
+  min-height:100vh;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:16px;
+
+  background:#f8f9fa;
+
+  position:relative;
+
+  overflow-x:hidden;
+}
+
+body::before{
+  content:'';
+
+  position:fixed;
+  inset:0;
+
+  background-image:url('img/background.jpg');
+  background-size:cover;
+  background-position:center;
+
+  opacity:.12;
+
+  z-index:-2;
+}
+
+body::after{
+  content:'';
+
+  position:fixed;
+  inset:0;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255,255,255,.7),
+      transparent 30%
+    ),
+
+    radial-gradient(
+      circle at bottom right,
+      rgba(232,62,140,.08),
+      transparent 35%
+    );
+
+  z-index:-1;
+}
+
+.container{
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.96),
+      rgba(255,255,255,.88)
+    );
+
+  backdrop-filter:blur(10px);
+
+  padding:2.2rem 1.6rem;
+
+  border-radius:30px;
+
+  box-shadow:
+    0 25px 70px rgba(0,0,0,.12),
+    0 10px 24px rgba(232,62,140,.08),
+    inset 0 1px 0 rgba(255,255,255,.9);
+
+  max-width:470px;
+  width:100%;
+
+  text-align:center;
+
+  position:relative;
+  overflow:hidden;
+
+  animation:
+    pageShow 1s
+    cubic-bezier(.2,.9,.2,1);
+}
+
+.container::before{
+  content:'';
+
+  position:absolute;
+  inset:-120px;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255,255,255,.95),
+      transparent 30%
+    ),
+
+    radial-gradient(
+      circle at bottom right,
+      rgba(232,62,140,.06),
+      transparent 35%
+    );
+
+  pointer-events:none;
+}
+
+@keyframes pageShow{
+
+  from{
+    opacity:0;
+
+    transform:
+      translateY(30px)
+      scale(.96);
+  }
+
+  to{
+    opacity:1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+#cipherBlock{
+  transition:
+    opacity .7s ease,
+    transform .7s ease;
+}
+
+#cipherBlock.hide{
+  opacity:0;
+
+  transform:
+    translateY(-20px)
+    scale(.96);
+
+  pointer-events:none;
+}
+
+h1{
+  font-size:2rem;
+
+  color:var(--accent);
+
+  margin-bottom:1.4rem;
+
+  font-weight:800;
+
+  letter-spacing:.5px;
+
+  text-shadow:
+    0 2px 10px rgba(232,62,140,.15);
+}
+
+.hint{
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff5fa,
+      #ffeef7
+    );
+
+  padding:1.5rem;
+
+  border-radius:22px;
+
+  margin:1.6rem 0;
+
+  line-height:1.8;
+
+  font-size:1.05rem;
+
+  border:1px solid rgba(232,62,140,.12);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.8),
+    0 6px 18px rgba(232,62,140,.06);
+}
+
+.secret-code{
+
+  margin:18px 0;
+
+  font-size:1.9rem;
+
+  font-weight:800;
+
+  letter-spacing:4px;
+
+  color:var(--accent);
+
+  text-shadow:
+    0 4px 12px rgba(232,62,140,.15);
+}
+
+input{
+  width:100%;
+
+  padding:18px;
+
+  font-size:1.4rem;
+
+  text-align:center;
+
+  border:2px solid #eee;
+
+  border-radius:16px;
+
+  margin:1.2rem 0;
+
+  transition:.25s;
+
+  background:white;
+
+  font-weight:700;
+
+  letter-spacing:2px;
+
+  box-shadow:
+    inset 0 2px 8px rgba(0,0,0,.03);
+}
+
+input:focus{
+
+  border-color:var(--accent);
+
+  outline:none;
+
+  transform:translateY(-1px);
+
+  box-shadow:
+    0 0 0 5px rgba(232,62,140,.12),
+    0 10px 24px rgba(232,62,140,.12);
+}
+
+button{
+
+  padding:16px 42px;
+
+  font-size:17px;
+
+  font-weight:700;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ff4f9a,
+      #e83e8c
+    );
+
+  color:white;
+
+  border:none;
+
+  border-radius:16px;
+
+  cursor:pointer;
+
+  margin-top:10px;
+
+  transition:.25s;
+
+  box-shadow:
+    0 10px 24px rgba(232,62,140,.28);
+}
+
+button:hover{
+
+  transform:
+    translateY(-2px)
+    scale(1.02);
+
+  box-shadow:
+    0 16px 32px rgba(232,62,140,.34);
+}
+
+button:active{
+  transform:scale(.98);
+}
+
+.final-reveal{
+  display:none;
+
+  opacity:0;
+
+  transform:scale(.85);
+}
+
+.final-reveal.show{
+
+  display:block;
+
+  animation:
+    revealAnimation 1s
+    cubic-bezier(.2,.9,.2,1.1)
+    forwards;
+}
+
+.number-image{
+  width:100%;
+
+  /*border-radius:5px;*/
+
+  margin-top:10px;
+
+  box-shadow:
+    0 20px 40px rgba(0,0,0,.18),
+    0 8px 20px rgba(0,0,0,.12);
+}
+
+.final-text{
+
+  margin-top:1.6rem;
+
+  font-size:1.15rem;
+
+  line-height:1.8;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff5fa,
+      #ffeef7
+    );
+
+  padding:1.4rem;
+
+  border-radius:20px;
+
+  box-shadow:
+    0 8px 22px rgba(232,62,140,.08);
+}
+
+@keyframes revealAnimation{
+
+  0%{
+    opacity:0;
+
+    transform:
+      scale(.8)
+      translateY(30px);
+  }
+
+  60%{
+    opacity:1;
+
+    transform:
+      scale(1.03)
+      translateY(-4px);
+  }
+
+  100%{
+    opacity:1;
+
+    transform:
+      scale(1)
+      translateY(0);
+  }
+}
+
+.sparkle{
+  position:absolute;
+
+  width:10px;
+  height:10px;
+
+  border-radius:50%;
+
+  background:white;
+
+  pointer-events:none;
+
+  animation:sparkle 2s linear infinite;
+}
+
+@keyframes sparkle{
+
+  0%{
+    transform:
+      translateY(0)
+      scale(0);
+
+    opacity:0;
+  }
+
+  50%{
+    opacity:1;
+  }
+
+  100%{
+    transform:
+      translateY(-100px)
+      scale(1.8);
+
+    opacity:0;
+  }
+}
+
+@media (max-width:480px){
+
+  h1{
+    font-size:1.7rem;
+  }
+
+  .secret-code{
+    font-size:1.5rem;
+    letter-spacing:2px;
+  }
+
+  input{
+    font-size:1.2rem;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div id="cipherBlock">
+
+    <h1>🔐 Последний шифр</h1>
+
+    <div class="hint">
+
+      Тебе нужно разгадать финальный шифр.
+      <br><br>
+
+      <div class="secret-code">
+        К463ОТ912
+      </div>
+
+      <strong>Правила:</strong>
+      <br><br>
+
+      • Каждую <strong>букву</strong>
+      сдвинь на <strong>3 позиции вперёд</strong>
+      по алфавиту
+      <br>
+
+      • Каждую <strong>цифру</strong>
+      сдвинь на <strong>2 позиции назад</strong>
+      <br><br>
+
+      Пример:<br>
+      М → П, В → Е<br>
+      6 → 4, 1 → 9
+
+    </div>
+
+    <input
+      type="text"
+      id="codeInput"
+      placeholder="Введи расшифрованный код"
+      maxlength="10"
+      autocomplete="off"
+    >
+
+    <button onclick="checkCode()">
+      Расшифровать
+    </button>
+
+  </div>
+
+  <div id="finalReveal" class="final-reveal">
+
+    <img
+      src="img/number.jpg"
+      alt=""
+      class="number-image"
+    >
+
+    <div class="final-text">
+
+      Это номер машины,
+      в которой тебя ждёт подарок ❤️
+
+      <br><br>
+
+      Иди и забери его ✨
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+function checkCode(){
+
+  const input = document
+    .getElementById('codeInput')
+    .value
+    .trim()
+    .toUpperCase();
+
+  const correct = "Н241СХ790";
+
+  if(input === correct){
+
+    const cipherBlock =
+      document.getElementById('cipherBlock');
+
+    const finalReveal =
+      document.getElementById('finalReveal');
+
+    cipherBlock.classList.add('hide');
+
+    setTimeout(()=>{
+
+      cipherBlock.style.display='none';
+
+      finalReveal.classList.add('show');
+
+      createSparkles();
+
+    },700);
+
+  }else{
+
+    shakeInput();
+
+    setTimeout(()=>{
+      alert("Не совсем верно... Попробуй ещё раз ❤️");
+    },200);
+  }
+}
+
+function shakeInput(){
+
+  const input =
+    document.getElementById('codeInput');
+
+  input.animate([
+
+    { transform:'translateX(0)' },
+    { transform:'translateX(-8px)' },
+    { transform:'translateX(8px)' },
+    { transform:'translateX(-6px)' },
+    { transform:'translateX(6px)' },
+    { transform:'translateX(0)' }
+
+  ],{
+    duration:400
+  });
+}
+
+function createSparkles(){
+
+  const container =
+    document.querySelector('.container');
+
+  for(let i=0;i<18;i++){
+
+    const spark =
+      document.createElement('div');
+
+    spark.className='sparkle';
+
+    spark.style.left =
+      Math.random()*100 + '%';
+
+    spark.style.bottom='120px';
+
+    spark.style.animationDelay =
+      Math.random()*1.5 + 's';
+
+    spark.style.animationDuration =
+      1.5 + Math.random()*2 + 's';
+
+    container.appendChild(spark);
+  }
+}
+
+document
+  .getElementById('codeInput')
+  .addEventListener('keypress',function(e){
+
+    if(e.key === 'Enter'){
+      checkCode();
+    }
+});
+
+</script>
+
+</body>
+</html>
