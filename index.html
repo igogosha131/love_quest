@@ -223,11 +223,11 @@
       <button class="spoiler-btn" type="button" onclick="toggleSpoiler()"></button>
       <div class="spoiler-content" id="spoiler">
         <img src="pen.jpg" alt="Подсказка: место, где лежит ручка">
-       /* ==  <p style="margin-top: 8px; font-size: 13px; color: #666;">Подсказка: она ждёт тебя именно здесь 😉</p> == */  
+    <!--   <p style="margin-top: 8px; font-size: 13px; color: #666;">Подсказка: она ждёт тебя именно здесь 😉</p>   -->
       </div>
     </div>
 
-    <a href="step1.html" class="start-btn">Начать квест →</a>
+ <!--   <a href="step1.html" class="start-btn">Начать квест →</a>  -->
   </div>
 
   <script>
@@ -241,10 +241,10 @@
 
       if (spoiler.style.display === 'block') {
         spoiler.style.display = 'none';
-        btn.textContent = '📍 Показать, где искать';
+        btn.textContent = '📍 Начать квест';
       } else {
         spoiler.style.display = 'block';
-        btn.textContent = '🔽 Скрыть подсказку';
+        btn.textContent = '🔽 Скрыть фото';
       }
     }
   </script>
