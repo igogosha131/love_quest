@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🎧 Аудио-сейф</title>
+  <style>
+    :root { --bg: #f8f9fa; --accent: #e83e8c; --text: #333; --card: #fff; --progress-bg: #eee; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: var(--bg);
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image: url('img/background.jpg');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.12;
+      z-index: -1;
+    }
+
+    .container {
+      background: var(--card);
+      padding: 2rem 1.5rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      animation: slideUp 0.6s ease-out;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    h1 { font-size: 1.75rem; margin-bottom: 0.4rem; color: var(--accent); }
+    .subtitle { color: #666; font-size: 1rem; margin-bottom: 1.6rem; }
+
+    /* Обложка */
+    .cover {
+      width: 180px; height: 180px;
+      margin: 0 auto 1.6rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fce4ec, #f8bbd9, #f48fb1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 25px rgba(232, 62, 140, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::before {
+      content: '';
+      position: absolute;
+      width: 150%; height: 150%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+      animation: pulse 3s ease-in-out infinite;
+      opacity: 0.6;
+    }
+    .cover-icon { font-size: 3.5rem; z-index: 1; transition: transform 0.3s; }
+    .playing .cover-icon { animation: bounce 0.8s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+    /* Плеер */
+    .player {
+      background: #fafafa;
+      border-radius: 16px;
+      padding: 1.4rem 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .time {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      color: #888;
+      margin-bottom: 0.6rem;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 7px;
+      background: var(--progress-bg);
+      border-radius: 4px;
+      margin: 0.8rem 0;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      border-radius: 4px;
+      transition: width 0.1s linear;
+      position: relative;
+    }
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      right: -6px; top: 50%;
+      transform: translateY(-50%);
+      width: 13px; height: 13px;
+      background: #fff;
+      border: 2.5px solid var(--accent);
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .progress-container:hover .progress-fill::after { opacity: 1; }
+
+    /* Кнопки */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 0.8rem;
+    }
+    .btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--accent);
+      transition: transform 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn:active { transform: scale(0.88); }
+
+    .btn-play {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.65rem;
+      box-shadow: 0 5px 18px rgba(232, 62, 140, 0.4);
+    }
+
+    .btn-skip {
+      font-size: 1.45rem;
+      opacity: 0.9;
+    }
+
+    .autoplay-note {
+      font-size: 12px;
+      color: #999;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    @media (max-width: 360px) {
+      .container { padding: 1.6rem 1rem; }
+      .cover { width: 155px; height: 155px; }
+      .cover-icon { font-size: 2.9rem; }
+      .btn-play { width: 56px; height: 56px; font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="playerContainer">
+    <h1>🎧 Аудио-сейф</h1>
+    <p class="subtitle">Нажми ▶, чтобы прослушать ❤️</p>
+
+    <div class="cover" id="cover">
+      <span class="cover-icon" id="coverIcon">♪</span>
+    </div>
+
+    <div class="player">
+      <audio id="audio" preload="auto">
+        <source src="audio/message.mp3" type="audio/mpeg">
+      </audio>
+
+      <div class="time">
+        <span id="currentTime">0:00</span>
+        <span id="duration">0:00</span>
+      </div>
+
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-skip" onclick="skip(-10)" title="Назад 10 сек">⤆</button>
+        <button class="btn btn-play" id="playBtn" onclick="togglePlay()">▶</button>
+        <button class="btn btn-skip" onclick="skip(10)" title="Вперёд 10 сек">⤇</button>
+      </div>
+    </div>
+
+    <p class="autoplay-note" id="autoplayNote">🔊 Нажми на плеер, чтобы начать воспроизведение</p>
+  </div>
+
+  <script>
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const cover = document.getElementById('cover');
+    const coverIcon = document.getElementById('coverIcon');
+    const progressFill = document.getElementById('progressFill');
+    const progressContainer = document.getElementById('progressContainer');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const autoplayNote = document.getElementById('autoplayNote');
+    const container = document.getElementById('playerContainer');
+
+    let isPlaying = false;
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateProgress() {
+      const percent = (audio.currentTime / audio.duration) * 100 || 0;
+      progressFill.style.width = `${percent}%`;
+      currentTimeEl.textContent = formatTime(audio.currentTime);
+    }
+
+    audio.addEventListener('loadedmetadata', () => durationEl.textContent = formatTime(audio.duration));
+    audio.addEventListener('timeupdate', updateProgress);
+
+    audio.addEventListener('ended', () => {
+      isPlaying = false;
+      playBtn.innerHTML = '🔁';
+      cover.classList.remove('playing');
+      coverIcon.textContent = '🎵';
+    });
+
+    function togglePlay() {
+      if (audio.paused) {
+        audio.play().then(() => {
+          isPlaying = true;
+          playBtn.innerHTML = '❚❚';
+          cover.classList.add('playing');
+          coverIcon.textContent = '💗';
+          autoplayNote.style.display = 'none';
+        }).catch(() => {
+          autoplayNote.style.display = 'block';
+        });
+      } else {
+        audio.pause();
+        isPlaying = false;
+        playBtn.innerHTML = '▶';
+        cover.classList.remove('playing');
+        coverIcon.textContent = '♪';
+      }
+    }
+
+    function skip(seconds) {
+      audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + seconds));
+    }
+
+    progressContainer.addEventListener('click', (e) => {
+      const rect = progressContainer.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      audio.currentTime = percent * audio.duration;
+    });
+
+    window.addEventListener('load', () => {
+      audio.play().then(() => {
+        isPlaying = true;
+        playBtn.innerHTML = '❚❚';
+        cover.classList.add('playing');
+        coverIcon.textContent = '❤';
+      }).catch(() => {
+        autoplayNote.style.display = 'block';
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+      if (e.code === 'ArrowLeft') skip(-10);
+      if (e.code === 'ArrowRight') skip(10);
+    });
+  </script>
+</body>
+</html>

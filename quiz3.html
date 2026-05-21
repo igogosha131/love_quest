@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Кто хочет стать миллионером</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --accent: #e83e8c;
+      --text: #333;
+      --card: #fff;
+      --progress-bg: #eee;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: var(--bg);
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image: url('img/background.jpg');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.12;
+      z-index: -1;
+    }
+
+    .container {
+      background: var(--card);
+      padding: 2rem 1.5rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h1 { font-size: 1.75rem; margin-bottom: 0.4rem; color: var(--accent); }
+    .subtitle { color: #666; font-size: 1rem; margin-bottom: 1.8rem; }
+
+    /* Плеер */
+    .player {
+      background: #fafafa;
+      border-radius: 16px;
+      padding: 1.4rem 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    .time { display: flex; justify-content: space-between; font-size: 12.5px; color: #888; margin-bottom: 0.6rem; }
+
+    .progress-container {
+      width: 100%; height: 7px; background: var(--progress-bg); border-radius: 4px;
+      margin: 0.8rem 0; cursor: pointer; position: relative; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: var(--accent); width: 0%; border-radius: 4px;
+      transition: width 0.1s linear; position: relative;
+    }
+    .progress-fill::after {
+      content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+      width: 13px; height: 13px; background: #fff; border: 2.5px solid var(--accent);
+      border-radius: 50%; opacity: 0; transition: opacity 0.2s;
+    }
+    .progress-container:hover .progress-fill::after { opacity: 1; }
+
+    .controls {
+      display: flex; align-items: center; justify-content: center; gap: 32px; margin-top: 0.8rem;
+    }
+    .btn {
+      background: none; border: none; cursor: pointer; color: var(--accent);
+      transition: transform 0.15s ease; display: flex; align-items: center; justify-content: center;
+    }
+    .btn:active { transform: scale(0.88); }
+
+    .btn-play {
+      width: 62px; height: 62px; border-radius: 50%; background: var(--accent); color: #fff;
+      font-size: 1.65rem; box-shadow: 0 5px 18px rgba(232, 62, 140, 0.4);
+    }
+    .btn-skip { font-size: 1.45rem; opacity: 0.9; }
+
+    /* Вопрос */
+    .quiz-container {
+      margin-top: 0.5rem;
+    }
+    .question {
+      font-size: 1.15rem;
+      margin-bottom: 1.4rem;
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .option-btn {
+      padding: 16px 18px;
+      background: #fff;
+      border: 2px solid #ddd;
+      border-radius: 14px;
+      font-size: 1.02rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+    .option-btn:hover {
+      border-color: var(--accent);
+      background: #fff9fb;
+    }
+
+    .feedback {
+      margin-top: 1.3rem;
+      font-size: 1.1rem;
+      min-height: 1.8em;
+    }
+
+    .btn-continue {
+      margin-top: 1.4rem;
+      padding: 14px 36px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 5px 16px rgba(232, 62, 140, 0.35);
+    }
+    .btn-continue:hover {
+      transform: translateY(-2px);
+    }
+
+    .autoplay-note {
+      font-size: 12px;
+      color: #999;
+      margin-top: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <h1>Кто хочет стать миллионером</h1>
+    <p class="subtitle">Нажми ▶, чтобы прослушать вопрос</p>
+
+    <div class="player">
+      <audio id="audio" preload="auto">
+        <source src="audio/millionaire.mp3" type="audio/mpeg">
+      </audio>
+
+      <div class="time">
+        <span id="currentTime">0:00</span>
+        <span id="duration">0:00</span>
+      </div>
+
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-skip" onclick="skip(-10)" title="Назад 10 сек">⤆</button>
+        <button class="btn btn-play" id="playBtn" onclick="togglePlay()">▶</button>
+        <button class="btn btn-skip" onclick="skip(10)" title="Вперёд 10 сек">⤇</button>
+      </div>
+    </div>
+
+<!--    <p class="autoplay-note" id="autoplayNote">🔊 Нажми на плеер, чтобы начать воспроизведение</p>-->
+
+    <!-- Один вопрос -->
+    <div class="quiz-container">
+<!--      <h2 style="margin: 1.8rem 0 1rem; color: var(&#45;&#45;accent);">Вопрос 1/4</h2>-->
+      <p class="question" id="questionText"></p>
+
+      <div class="options" id="optionsContainer"></div>
+
+      <div class="feedback" id="feedback"></div>
+
+      <button class="btn-continue" id="continueBtn" onclick="goToNext()" style="display:none;">
+        Перейти к следующему вопросу →
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // ==================== ПЛЕЕР ====================
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const progressFill = document.getElementById('progressFill');
+    const progressContainer = document.getElementById('progressContainer');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const autoplayNote = document.getElementById('autoplayNote');
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateProgress() {
+      const percent = (audio.currentTime / audio.duration) * 100 || 0;
+      progressFill.style.width = `${percent}%`;
+      currentTimeEl.textContent = formatTime(audio.currentTime);
+    }
+
+    audio.addEventListener('loadedmetadata', () => durationEl.textContent = formatTime(audio.duration));
+    audio.addEventListener('timeupdate', updateProgress);
+
+    function togglePlay() {
+      if (audio.paused) {
+        audio.play().then(() => {
+          playBtn.innerHTML = '❚❚';
+          autoplayNote.style.display = 'none';
+        }).catch(() => autoplayNote.style.display = 'block');
+      } else {
+        audio.pause();
+        playBtn.innerHTML = '▶';
+      }
+    }
+
+    function skip(seconds) {
+      audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + seconds));
+    }
+
+    progressContainer.addEventListener('click', (e) => {
+      const rect = progressContainer.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      audio.currentTime = percent * audio.duration;
+    });
+
+    // ==================== ОДИН ВОПРОС ====================
+    const questionData = {
+      question: "Выбери ответ на вопрос",
+      options: [
+        "Париж",
+        "Стамбул",
+        "Токио",
+        "Нью-Йорк"
+      ],
+      correct: 1   // индекс правильного ответа (0,1,2,3)
+    };
+
+    function loadQuestion() {
+      document.getElementById('questionText').textContent = questionData.question;
+
+      const container = document.getElementById('optionsContainer');
+      container.innerHTML = '';
+      document.getElementById('feedback').innerHTML = '';
+      document.getElementById('continueBtn').style.display = 'none';
+
+      questionData.options.forEach((option, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = option;
+        btn.onclick = () => checkAnswer(index);
+        container.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selectedIndex) {
+      const feedback = document.getElementById('feedback');
+
+      if (selectedIndex === questionData.correct) {
+        feedback.innerHTML = `<span style="color:#4ade80">❤️ Правильно!</span>`;
+        document.getElementById('continueBtn').style.display = 'inline-block';
+      } else {
+        feedback.innerHTML = `<span style="color:#ff6b6b">🤔 Подумай ещё...</span>`;
+      }
+    }
+
+    function goToNext() {
+      window.location.href = "quiz4.html";
+    }
+
+    // Запуск при загрузке
+    window.addEventListener('load', () => {
+      loadQuestion();
+      audio.play().then(() => {
+        playBtn.innerHTML = '❚❚';
+      }).catch(() => autoplayNote.style.display = 'block');
+    });
+  </script>
+</body>
+</html>

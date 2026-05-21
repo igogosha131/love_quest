@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Угадай мелодию</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --accent: #e83e8c;
+      --text: #333;
+      --card: #fff;
+      --progress-bg: #eee;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image: url('img/background.jpg');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.12;
+      z-index: -1;
+    }
+    .container {
+      background: var(--card);
+      padding: 2rem 1.5rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      max-width: 460px;
+      width: 100%;
+      margin: 0 auto;
+      text-align: center;
+    }
+    h1 { font-size: 1.75rem; color: var(--accent); margin-bottom: 0.4rem; }
+    .subtitle { color: #666; margin-bottom: 1.8rem; }
+
+    /* ==================== ДОБАВЛЕННЫЙ ПЛЕЕР ==================== */
+    .player {
+      background: #fafafa;
+      border-radius: 16px;
+      padding: 1.4rem 1.2rem;
+      margin-bottom: 2rem;
+    }
+    .time { display: flex; justify-content: space-between; font-size: 12.5px; color: #888; margin-bottom: 0.6rem; }
+    .progress-container {
+      width: 100%; height: 7px; background: var(--progress-bg); border-radius: 4px;
+      margin: 0.8rem 0; cursor: pointer; position: relative; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: var(--accent); width: 0%; border-radius: 4px;
+      transition: width 0.1s linear; position: relative;
+    }
+    .progress-fill::after {
+      content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+      width: 13px; height: 13px; background: #fff; border: 2.5px solid var(--accent);
+      border-radius: 50%; opacity: 0; transition: opacity 0.2s;
+    }
+    .progress-container:hover .progress-fill::after { opacity: 1; }
+    .controls {
+      display: flex; align-items: center; justify-content: center; gap: 32px; margin-top: 0.8rem;
+    }
+    .btn {
+      background: none; border: none; cursor: pointer; color: var(--accent);
+      transition: transform 0.15s ease; display: flex; align-items: center; justify-content: center;
+    }
+    .btn:active { transform: scale(0.88); }
+    .btn-play {
+      width: 62px; height: 62px; border-radius: 50%; background: var(--accent); color: #fff;
+      font-size: 1.65rem; box-shadow: 0 5px 18px rgba(232, 62, 140, 0.4);
+    }
+    .btn-skip { font-size: 1.45rem; opacity: 0.9; }
+    /* ====================================================== */
+
+    .stage-title {
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin: 1.5rem 0 1rem;
+      font-weight: 600;
+    }
+    .track {
+      background: #fafafa;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      text-align: left;
+      border: 2px solid #eee;
+    }
+    .track-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .input-field {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      font-size: 1rem;
+      margin-top: 6px;
+    }
+    .order-area {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #f8f0f4;
+      border-radius: 16px;
+      border: 2px dashed var(--accent);
+    }
+    .order-item {
+      background: white;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 2px solid #ddd;
+      margin-bottom: 8px;
+      text-align: left;
+      cursor: grab;
+      user-select: none;
+    }
+    .btn {
+      margin-top: 1.2rem;
+      padding: 14px 36px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .feedback {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      min-height: 1.8em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Угадай мелодию</h1>
+
+    <!-- Новый плеер для задания -->
+    <div class="player">
+      <audio id="taskAudio" preload="auto">
+        <source src="audio/melody.mp3" type="audio/mpeg">
+      </audio>
+      <div class="time">
+        <span id="currentTime">0:00</span>
+        <span id="duration">0:00</span>
+      </div>
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-skip" onclick="skipTask(-10)" title="Назад 10 сек">⤆</button>
+        <button class="btn btn-play" id="playBtn" onclick="toggleTaskPlay()">▶</button>
+        <button class="btn btn-skip" onclick="skipTask(10)" title="Вперёд 10 сек">⤇</button>
+      </div>
+    </div>
+
+    <!-- Этап 1: Названия -->
+    <div id="stage1">
+      <p class="subtitle">Этап 1 — Угадай названия песен</p>
+      <div class="track" id="track1"><div class="track-header"></div><audio controls><source src="audio/track1.mp3" type="audio/mpeg"></audio><input type="text" class="input-field" placeholder="Название песни" data-id="1"></div>
+      <div class="track" id="track2"><div class="track-header"></div><audio controls><source src="audio/track2.mp3" type="audio/mpeg"></audio><input type="text" class="input-field" placeholder="Название песни" data-id="2"></div>
+      <div class="track" id="track3"><div class="track-header"> </div><audio controls><source src="audio/track3.mp3" type="audio/mpeg"></audio><input type="text" class="input-field" placeholder="Название песни" data-id="3"></div>
+      <div class="track" id="track4"><div class="track-header"></div><audio controls><source src="audio/track4.mp3" type="audio/mpeg"></audio><input type="text" class="input-field" placeholder="Название песни" data-id="4"></div>
+
+      <button class="btn" onclick="checkNames()">Проверить названия</button>
+      <div class="feedback" id="feedback1"></div>
+    </div>
+
+    <!-- Этап 2: Расстановка -->
+    <div id="stage2" style="display:none;">
+      <p class="stage-title">Этап 2 — Расставь песни по порядку,<br>в котором ты их слушала<br> в разные этапы своей жизни</p>
+      <div class="order-area">
+        <div class="order-list" id="orderList"></div>
+      </div>
+      <button class="btn" onclick="checkOrder()">Проверить порядок</button>
+      <div class="feedback" id="feedback2"></div>
+      <button class="btn" id="nextBtn" onclick="goToNext()" style="display:none; background:#4ade80;">
+        Продолжить →
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ==================== ПЛЕЕР ЗАДАНИЯ ====================
+    const taskAudio = document.getElementById('taskAudio');
+    const playBtn = document.getElementById('playBtn');
+    const progressFill = document.getElementById('progressFill');
+    const progressContainer = document.getElementById('progressContainer');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateTaskProgress() {
+      const percent = (taskAudio.currentTime / taskAudio.duration) * 100 || 0;
+      progressFill.style.width = `${percent}%`;
+      currentTimeEl.textContent = formatTime(taskAudio.currentTime);
+    }
+
+    taskAudio.addEventListener('loadedmetadata', () => durationEl.textContent = formatTime(taskAudio.duration));
+    taskAudio.addEventListener('timeupdate', updateTaskProgress);
+
+    function toggleTaskPlay() {
+      if (taskAudio.paused) {
+        taskAudio.play();
+        playBtn.innerHTML = '❚❚';
+      } else {
+        taskAudio.pause();
+        playBtn.innerHTML = '▶';
+      }
+    }
+
+    function skipTask(seconds) {
+      taskAudio.currentTime = Math.max(0, Math.min(taskAudio.duration || 0, taskAudio.currentTime + seconds));
+    }
+
+    progressContainer.addEventListener('click', (e) => {
+      const rect = progressContainer.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      taskAudio.currentTime = percent * taskAudio.duration;
+    });
+
+    // ==================== ОСНОВНОЙ КОД (без изменений) ====================
+    const correctKeywords = {
+      1: ["так красиво", "красиво"],
+      2: ["кушаю яд", "яд"],
+      3: ["песок под ногами", "песок", "ногами"],
+      4: ["all i need", "all", "need"]
+    };
+
+    let currentOrder = [
+      {id:1, name:"Так красиво"},
+      {id:2, name:"Кушаю яд"},
+      {id:3, name:"Песок под ногами"},
+      {id:4, name:"All i need"}
+    ];
+
+    const rightOrder = [2, 3, 4, 1];
+
+    function checkNames() {
+      let allCorrect = true;
+      const inputs = document.querySelectorAll('#stage1 input');
+      inputs.forEach(input => {
+        const id = parseInt(input.dataset.id);
+        const value = input.value.toLowerCase().trim();
+        const keywords = correctKeywords[id];
+        const isCorrect = keywords.some(kw => value.includes(kw));
+        if (!isCorrect) allCorrect = false;
+      });
+
+      const fb = document.getElementById('feedback1');
+      if (allCorrect) {
+        fb.innerHTML = `<span style="color:#4ade80">✅ Отлично! Все названия угаданы!</span>`;
+        document.getElementById('stage1').style.display = 'none';
+        document.getElementById('stage2').style.display = 'block';
+        renderOrderList();
+      } else {
+        fb.innerHTML = `<span style="color:#ff6b6b">🤔 Не все названия верны. Попробуй ещё раз.</span>`;
+      }
+    }
+
+    function renderOrderList() {
+      const list = document.getElementById('orderList');
+      list.innerHTML = '';
+      currentOrder.forEach((track, index) => {
+        const item = document.createElement('div');
+        item.className = 'order-item';
+        item.draggable = true;
+        item.dataset.index = index;
+        item.textContent = `${index + 1}. ${track.name}`;
+
+        item.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', index));
+        item.addEventListener('dragover', e => e.preventDefault());
+        item.addEventListener('drop', e => {
+          e.preventDefault();
+          const from = parseInt(e.dataTransfer.getData('text/plain'));
+          const to = parseInt(item.dataset.index);
+          if (from !== to) {
+            const moved = currentOrder.splice(from, 1)[0];
+            currentOrder.splice(to, 0, moved);
+            renderOrderList();
+          }
+        });
+        list.appendChild(item);
+      });
+    }
+
+    function checkOrder() {
+      const userOrder = currentOrder.map(t => t.id);
+      const fb = document.getElementById('feedback2');
+      if (JSON.stringify(userOrder) === JSON.stringify(rightOrder)) {
+        fb.innerHTML = `<span style="color:#4ade80">❤️ Всё правильно! Ты супер!</span>`;
+        document.getElementById('nextBtn').style.display = 'block';
+      } else {
+        fb.innerHTML = `<span style="color:#ff6b6b">🤔 Порядок неправильный. Попробуй ещё раз.</span>`;
+      }
+    }
+
+    function goToNext() {
+      window.location.href = "quiz5.html";
+    }
+  </script>
+</body>
+</html>
